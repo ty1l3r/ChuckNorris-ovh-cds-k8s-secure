@@ -77,10 +77,53 @@ Les certificats et fichiers kubeconfig sont générés manuellement pour chaque 
 
 Voir certificats/README.md pour les explications.
 
+## Pipeline CI/CD avec OVH CDS
+
+Le projet intègre un pipeline CI/CD complet via OVH CDS (Continuous Delivery Service), configuré pour suivre les meilleures pratiques DevSecOps :
+
+### Structure du pipeline
+
+```
+Dev Pipeline → Approbation Manuelle → Prod Pipeline
+    │
+    ├── 📊 Analyse statique (Bandit)
+    ├── 📦 Scan des dépendances (pip-audit)
+    ├── 🔧 Build d'image Docker (sécurisé)
+    ├── 🔎 Scan de vulnérabilités (Trivy)
+    ├── 🔏 Signature d'image (cosign)
+    ├── 📋 Validation des charts Helm (kube-score)
+    ├── 📦 Déploiement en dev (secure kubeconfig)
+    └── 🕷️ Test de sécurité dynamique (ZAP)
+```
+
+### Mesures de sécurité implémentées
+
+* **Shift-left security** : Détection des problèmes de sécurité au plus tôt dans le cycle 
+* **Defense-in-depth** : Multiples couches de contrôles (code, dépendances, conteneur, configuration)
+* **Runtime protection** : Analyse dynamique post-déploiement
+* **Secret management** : Utilisation de Vault pour les credentials sensibles
+* **Image signing** : Garantie de l'intégrité des images via signatures cryptographiques
+* **Least privilege** : Contextes d'exécution réduits pour chaque étape
+
+### Utilisation du pipeline
+
+```bash
+# Vérification locale de la syntaxe CDS
+cdsctl workflow lint .cds.yaml
+
+# Déploiement du workflow
+cdsctl workflow push .cds.yaml
+
+# Exécution manuelle du workflow
+cdsctl workflow run chucknorris-secure-pipeline
+```
+
+Le pipeline suit un modèle GitOps où les changements sur la branche `dev` déclenchent automatiquement le workflow complet, avec validation manuelle requise avant le déploiement en production.
+
 ## À faire
-* Intégration pipeline OVH CDS (cds.yaml)
-* Ajout d'un scanner Trivy ou kube-score dans le workflow
-* Ajout d'un ServiceAccount restreint pour les workloads
+* ✅ Intégration pipeline OVH CDS (cds.yaml)
+* ✅ Ajout d'un scanner Trivy dans le workflow
+* Ajout d'un ServiceAccount restreint pour les workloads 
 * Ajout de tests automatisés basiques
 
 ## Licence
