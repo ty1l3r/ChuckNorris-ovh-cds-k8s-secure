@@ -1,0 +1,37 @@
+# ===================================================================
+# Service pour l'Application ChuckNorris
+# ===================================================================
+# Description:   Exposition interne de l'application web
+# Version:       1.0.0
+# Responsable:   Équipe DevOps <devops@example.com>
+# Mise à jour:   15-10-2023
+#
+# Ce template définit le service Kubernetes qui expose l'application
+# ChuckNorris à l'intérieur du cluster. Il sert d'abstraction stable
+# au-dessus des pods, permettant la découverte de service et l'équilibrage
+# de charge interne. Il est référencé par la ressource Ingress pour
+# l'exposition externe.
+# ===================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  # Nom du service généré à partir du nom du conteneur
+  name: {{ .Values.containerName }}-svc
+  # Déployé dans le même namespace que l'application
+  namespace: {{ .Values.namespace }}
+  # Labels cohérents avec le reste de l'application
+  labels:
+    app: {{ .Values.appLabel }}
+    stage: {{ .Values.stage }}
+spec:
+  # Sélectionne les pods par leur label app
+  selector:
+    app: {{ .Values.appLabel }}
+  # Configuration des ports exposés
+  ports:
+    - protocol: TCP
+      port: 80            # Port standard HTTP exposé par le service
+      targetPort: {{ .Values.containerPort }}  # Port de l'application dans le conteneur
+  # Type ClusterIP: accessible uniquement au sein du cluster
+  type: ClusterIP

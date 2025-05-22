@@ -1,0 +1,37 @@
+# ===================================================================
+# Service pour Base de Données PostgreSQL
+# ===================================================================
+# Description:   Point d'accès réseau pour la base de données
+# Version:       1.0.0
+# Responsable:   Équipe DevOps <devops@example.com>
+# Mise à jour:   15-10-2023
+#
+# Ce template définit le service Kubernetes qui expose la base de données
+# PostgreSQL uniquement au sein du cluster (ClusterIP). Il sert de point
+# d'entrée stable pour les connexions à la base de données, indépendant
+# des cycles de vie des pods.
+# ===================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  # Nom du service (utilisé pour les connexions)
+  name: {{ .Values.db.serviceName }}
+  # Déployé dans le même namespace que l'application
+  namespace: {{ .Values.namespace }}
+  # Étiquettes cohérentes avec le reste de l'application
+  labels:
+    app: {{ .Values.db.appLabel }}
+    stage: {{ .Values.stage }}
+spec:
+  # Sélectionne les pods de base de données par leur label
+  selector:
+    app: {{ .Values.db.appLabel }}
+  # Configuration des ports exposés
+  ports:
+    - protocol: TCP
+      port: 5432          # Port standard PostgreSQL exposé par le service
+      targetPort: {{ .Values.db.containerPort }}
+  # Type ClusterIP: accessible uniquement au sein du cluster
+  # Stratégie de sécurité pour éviter l'exposition externe
+  type: ClusterIP

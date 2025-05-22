@@ -1,0 +1,17 @@
+# ─────────────────────────────────────────────
+# 🔗 Liaison du rôle à l’identifiant de service
+# Objectif : rattacher le rôle à chuck-app-sa
+# ─────────────────────────────────────────────
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: chuck-app-binding
+  namespace: dev
+subjects:
+  - kind: ServiceAccount
+    name: chuck-app-sa
+    namespace: dev
+roleRef:
+  kind: Role
+  name: chuck-app-role
+  apiGroup: rbac.authorization.k8s.io

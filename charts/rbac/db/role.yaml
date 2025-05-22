@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: chuck-db-role
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: postgres
+    stage: {{ .Values.stage }}
+rules:
+  # Accès au PVC utilisé par le pod
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+
+  # Accès aux ConfigMaps ou Secrets de configuration (si utilisé plus tard)
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]

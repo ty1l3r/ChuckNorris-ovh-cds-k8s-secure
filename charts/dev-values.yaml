@@ -1,44 +1,67 @@
-# charts/dev-values.yaml
+# ──────────────────────────────────────────────────────────────
+#  Configuration Helm : Application Flask Chuck Norris Facts
+# ──────────────────────────────────────────────────────────────
 
-# Nom du namespace cible
+# Namespace de déploiement (ex: dev, prod)
 namespace: dev
 
-# Indication d'environnement (affiché en label)
+# Étiquette d’environnement (affichée comme label)
 stage: dev
 
-# Nombre de pods souhaités
+# Nombre de réplicas
 replicaCount: 1
 
-# Nom unique de la ressource Kubernetes (Deployment, Service, etc.)
+# Nom unique du déploiement (override du nom généré par Helm)
 fullnameOverride: chuck-dev
 
-# Nom d'identification logique utilisé dans les labels et selectors
+# Labels utilisés dans les métadonnées et les selectors
 appLabel: chucknorris
-
-# Nom du conteneur (visible avec kubectl describe pod)
 containerName: chucknorris
 
-# Image Docker à utiliser
+# Service Account (lié au rôle RBAC spécifique à l'application)
+serviceAccountName: chuck-app-sa
+
+# Image Docker utilisée
 image:
   repository: t1l3r/chucknorris
-  tag: 1.0.0
+  tag: "1.0.0"
 
-# Port exposé par le conteneur (ex: Flask)
+# Port HTTP exposé (ex: Flask 5000)
 containerPort: 5000
 
-# Contexte de sécurité appliqué au Pod
+# Contexte de sécurité pour le Pod
 podSecurityContext:
   runAsUser: 1000
   runAsNonRoot: true
   fsGroup: 1000
 
-# Contexte de sécurité appliqué au conteneur
+# Contexte de sécurité pour le conteneur
 containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   dropCapabilities: ALL
 
-# Configuration de l'accès via Ingress
+# Ressources demandées et limites allouées
+resources:
+  limits:
+    cpu: "250m"
+    memory: "256Mi"
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+
+# Probes de santé : liveness & readiness
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 3
+
+# Configuration Ingress pour accès HTTP
 ingress:
   enabled: true
   host: chuck.dev.local

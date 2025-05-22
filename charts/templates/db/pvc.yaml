@@ -1,0 +1,35 @@
+# ===================================================================
+# Réclamation de Volume Persistant pour Base de Données
+# ===================================================================
+# Description:   Stockage persistant pour les données PostgreSQL
+# Version:       1.0.0
+# Responsable:   Équipe DevOps <devops@example.com>
+# Mise à jour:   15-10-2023
+#
+# Ce template définit le volume de stockage persistant nécessaire
+# pour la base de données PostgreSQL. Il permet de conserver les
+# données même en cas de redémarrage ou de reconstruction des pods.
+# ===================================================================
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  # Nom de la réclamation de volume persistant
+  name: {{ .Values.db.pvcName }}
+  # Déployé dans le même namespace que l'application
+  namespace: {{ .Values.namespace }}
+  # Étiquettes cohérentes avec le reste de l'application
+  labels:
+    app: {{ .Values.db.appLabel }}
+    stage: {{ .Values.stage }}
+spec:
+  # Mode d'accès de type ReadWriteOnce (un seul nœud peut monter en RW)
+  # Adapté pour les bases de données qui ne supportent pas l'accès concurrent
+  accessModes:
+    - ReadWriteOnce
+  # Quantité d'espace de stockage demandée
+  resources:
+    requests:
+      storage: {{ .Values.db.storage }}
+  # Classe de stockage à utiliser (dépend de l'infrastructure)
+  storageClassName: {{ .Values.db.storageClassName }}

@@ -1,0 +1,102 @@
+# ===================================================================
+# Template de Déploiement de l'Application ChuckNorris
+# ===================================================================
+# Description:   Configuration du déploiement de l'application web Flask
+# Version:       1.0.0
+# Responsable:   Équipe DevOps <devops@example.com>
+# Mise à jour:   15-10-2023
+#
+# Ce template définit le déploiement de l'application principale ChuckNorris
+# avec les configurations de sécurité renforcées (utilisateur non-root,
+# système de fichiers en lecture seule, etc.) et les sondes de disponibilité.
+# Le déploiement suit les recommandations de sécurité Pod Security Standards.
+# ===================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Nom unique du déploiement, paramétrable via values.yaml
+  name: {{ .Values.fullnameOverride }}
+  # Namespace spécifique à l'environnement (dev/prod)
+  namespace: {{ .Values.namespace }}
+  # Labels pour l'identification et le filtrage
+  labels:
+    app: {{ .Values.appLabel }}
+    stage: {{ .Values.stage }}
+spec:
+  # Configuration de la scalabilité horizontale
+  # Paramétrable selon l'environnement et les besoins de charge
+  replicas: {{ .Values.replicaCount }}
+  
+  # Définition du mécanisme de sélection des pods gérés par ce déploiement
+  # Crucial pour le bon fonctionnement des mises à jour et rollbacks
+  selector:
+    matchLabels:
+      app: {{ .Values.appLabel }}
+  
+  # Spécification du modèle de pod à déployer
+  template:
+    metadata:
+      # Labels cohérents avec le sélecteur défini ci-dessus
+      labels:
+        app: {{ .Values.appLabel }}
+        stage: {{ .Values.stage }}
+    spec:
+      # Utilisation d'un compte de service dédié avec permissions restreintes
+      # Conformité avec les principes de moindre privilège (least privilege)
+      serviceAccountName: {{ .Values.serviceAccountName }}
+
+      # Contexte de sécurité global appliqué à tous les conteneurs du pod
+      # Implémentation des principes de Pod Security Standards (restricted)
+      securityContext:
+        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
+        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+
+      containers:
+        - name: {{ .Values.containerName }}
+          # Spécification précise de l'image avec tag explicite (pas de :latest)
+          # Garantit la reproductibilité et la traçabilité des déploiements
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          
+          # Définition des ports exposés pour les communications internes
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+
+          # Configuration des sondes de liveness et readiness
+          # Assure une gestion optimale du cycle de vie des pods
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+
+          # Définition des ressources allouées au conteneur
+          # Basé sur les besoins estimés et les limites de l'environnement
+          resources:
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+
+          # Contexte de sécurité spécifique au conteneur
+          # Renforce la sécurité en limitant les capacités et en rendant le système de fichiers en lecture seule si nécessaire
+          securityContext:
+            readOnlyRootFilesystem: {{ .Values.containerSecurityContext.readOnlyRootFilesystem }}
+            allowPrivilegeEscalation: {{ .Values.containerSecurityContext.allowPrivilegeEscalation }}
+            capabilities:
+              drop:
+                - {{ .Values.containerSecurityContext.dropCapabilities }}

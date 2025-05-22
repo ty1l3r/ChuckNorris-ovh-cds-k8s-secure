@@ -1,0 +1,44 @@
+# ===================================================================
+# Configuration d'Exposition Web - Ingress
+# ===================================================================
+# Description:   Point d'entrée HTTP pour l'application ChuckNorris
+# Version:       1.0.0
+# Responsable:   Équipe DevOps <devops@example.com>
+# Mise à jour:   15-10-2023
+#
+# Ce template définit les règles d'accès HTTP pour exposer l'application
+# à l'extérieur du cluster via le contrôleur Ingress NGINX.
+# L'exposition est conditionnelle et paramétrable par environnement.
+# ===================================================================
+
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  # Nom de la ressource Ingress généré à partir du nom du conteneur
+  name: {{ .Values.containerName }}-ingress
+  # Déploiement dans le namespace approprié (dev/prod)
+  namespace: {{ .Values.namespace }}
+  # Labels cohérents avec le reste de l'application
+  labels:
+    app: {{ .Values.appLabel }}
+    stage: {{ .Values.stage }}
+  # Annotations spécifiques pour configurer le comportement du contrôleur Ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  # Règles de routage basées sur le nom d'hôte
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            # Prefix match pour capturer tous les chemins commençant par "/"
+            pathType: Prefix
+            backend:
+              service:
+                # Service cible pour le routage du trafic entrant
+                name: {{ .Values.containerName }}-svc
+                port:
+                  number: 80
+{{- end }}

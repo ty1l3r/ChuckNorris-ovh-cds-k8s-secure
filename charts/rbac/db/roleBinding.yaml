@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: chuck-db-binding
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: postgres
+    stage: {{ .Values.stage }}
+subjects:
+  - kind: ServiceAccount
+    name: chuck-db-sa
+    namespace: {{ .Values.namespace }}
+roleRef:
+  kind: Role
+  name: chuck-db-role
+  apiGroup: rbac.authorization.k8s.io
