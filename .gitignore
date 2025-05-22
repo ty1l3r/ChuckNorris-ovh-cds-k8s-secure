@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────
+# 🔐 Fichiers sensibles Kubernetes (jamais commit)
+# ─────────────────────────────────────────
+
+# Fichiers de clés et certificats utilisateur (définis précisément)
+certificats/ovh-dev/ovh-dev.key
+certificats/ovh-dev/ovh-dev.crt
+certificats/ovh-dev/ovh-dev.csr
+certificats/ovh-dev/ovh-dev.kubeconfig
+
+certificats/ovh-prod/ovh-prod.key
+certificats/ovh-prod/ovh-prod.crt
+certificats/ovh-prod/ovh-prod.csr
+certificats/ovh-prod/ovh-prod.kubeconfig
+
+# Certificat d’autorité du cluster (local)
+ca/server-ca.crt
+
+# ─────────────────────────────────────────
+# 🐍 Python
+# ─────────────────────────────────────────
+
+__pycache__/
+*.pyc
+
+# ─────────────────────────────────────────
+# 🐳 Docker / Images locales
+# ─────────────────────────────────────────
+
+*.tar
+*.img
+*.bak
+*.swp
+
+# ─────────────────────────────────────────
+# 💅 Divers
+# ─────────────────────────────────────────
+
+.vscode/
+*.code-workspace
+
+*.log
+
+# Fichiers d’environnement et de secrets
+.env
+.env.*
+*secret*
+*token*
+.netrc
+*.pwd
+*password*

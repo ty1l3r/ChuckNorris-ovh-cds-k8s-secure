@@ -1,0 +1,88 @@
+# ChuckNorris Facts – Déploiement Kubernetes sécurisé (CDS-ready)
+
+![OVH CDS](https://img.shields.io/badge/CI%2FCD-OVH%20CDS-blue)
+![K3S](https://img.shields.io/badge/Kubernetes-K3S-brightgreen)
+![Helm](https://img.shields.io/badge/Package-Helm-0F1689)
+![K8s Security](https://img.shields.io/badge/Security-K8s%20Best%20Practices-red)
+
+> Chuck Norris n'a pas besoin de secrets. Les credentials s'auto-signent pour lui.
+
+![Chuck Norris - ASCII Portrait](assets/chuck2.png)
+
+Ce projet propose un exemple complet de déploiement sécurisé d'une application Python minimaliste dans un cluster Kubernetes (K3s), avec Helm et une préparation CI/CD orientée GitOps et sécurité.
+
+## Objectif
+
+Mettre en place un workflow de déploiement sécurisé avec :
+* Séparation des environnements dev et prod
+* Utilisateurs Kubernetes restreints par certificats
+* RBAC strict par namespace
+* Helm chart factorisé
+* Préparation d'une chaîne CI/CD via OVH CDS
+
+## Stack utilisée
+
+| Composant | Usage |
+|-----------|-------|
+| Python 3.12 | Application (générateur Chuck Norris) |
+| Docker | Conteneurisation |
+| K3s | Cluster Kubernetes local |
+| Helm | Déploiement applicatif |
+| Git | GitOps (dev, prod) |
+| CDS (à venir) | CI/CD pipeline via OVH |
+
+## Arborescence simplifiée
+
+```
+.
+├── build/                  # Application Python + Dockerfile
+├── charts/                 # Helm chart complet
+│   ├── Chart.yaml
+│   ├── templates/
+│   ├── dev-values.yaml
+│   └── prod-values.yaml
+├── certificats/            # RBAC YAML uniquement (pas de clés)
+│   ├── ovh-dev/
+│   └── ovh-prod/
+├── ca/                     # Certificat d'autorité public (non versionné)
+└── .gitignore
+```
+
+## Sécurité & bonnes pratiques
+* Aucun fichier .key, .crt, .kubeconfig n'est versionné
+* RBAC strict et namespace isolé (dev, prod)
+* PodSecurity Standard : restricted
+* SecurityContext appliqué sur tous les workloads
+* Images Docker taguées (1.0.0) – pas de latest en prod
+
+## Déploiement (dev)
+
+```bash
+# Build de l'image
+cd build
+docker build -t <user>/chucknorris:1.0.0 .
+
+# Push vers Docker Hub
+docker push <user>/chucknorris:1.0.0
+
+# Déploiement Helm dans le namespace dev
+helm upgrade --install chuck-dev ./charts \
+  -f charts/dev-values.yaml \
+  --namespace dev
+```
+
+## Certificats & kubeconfigs
+
+Les certificats et fichiers kubeconfig sont générés manuellement pour chaque utilisateur via un script local non inclus dans ce repo. Seuls les fichiers RBAC (Role / RoleBinding) sont présents à des fins d'exemple.
+
+Voir certificats/README.md pour les explications.
+
+## À faire
+* Intégration pipeline OVH CDS (cds.yaml)
+* Ajout d'un scanner Trivy ou kube-score dans le workflow
+* Ajout d'un ServiceAccount restreint pour les workloads
+* Ajout de tests automatisés basiques
+
+## Licence
+
+Projet démonstratif. Aucun secret réel ni donnée de prod n'est versionnée. Destiné à prouver la capacité à sécuriser un pipeline DevOps local avec K3s, Helm et GitOps.

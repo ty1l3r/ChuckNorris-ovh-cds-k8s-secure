@@ -1,0 +1,18 @@
+# 📁 ~/cds-ovh/certificats/ovh-prod/rolebinding-ovh-prod.yaml
+# ──────────────────────────────────────────────────────────────
+# 🔗 Lie l’utilisateur `ovh-prod` à son rôle dans `prod`
+# ──────────────────────────────────────────────────────────────
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ovh-prod-binding
+  namespace: prod
+subjects:
+  - kind: User
+    name: ovh-prod
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: ovh-prod-role
+  apiGroup: rbac.authorization.k8s.io

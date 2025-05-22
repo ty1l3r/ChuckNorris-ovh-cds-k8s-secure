@@ -1,0 +1,44 @@
+# charts/dev-values.yaml
+
+# Nom du namespace cible
+namespace: dev
+
+# Indication d'environnement (affiché en label)
+stage: dev
+
+# Nombre de pods souhaités
+replicaCount: 1
+
+# Nom unique de la ressource Kubernetes (Deployment, Service, etc.)
+fullnameOverride: chuck-dev
+
+# Nom d'identification logique utilisé dans les labels et selectors
+appLabel: chucknorris
+
+# Nom du conteneur (visible avec kubectl describe pod)
+containerName: chucknorris
+
+# Image Docker à utiliser
+image:
+  repository: t1l3r/chucknorris
+  tag: 1.0.0
+
+# Port exposé par le conteneur (ex: Flask)
+containerPort: 5000
+
+# Contexte de sécurité appliqué au Pod
+podSecurityContext:
+  runAsUser: 1000
+  runAsNonRoot: true
+  fsGroup: 1000
+
+# Contexte de sécurité appliqué au conteneur
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  dropCapabilities: ALL
+
+# Configuration de l'accès via Ingress
+ingress:
+  enabled: true
+  host: chuck.dev.local

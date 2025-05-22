@@ -1,0 +1,18 @@
+# templates/service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.containerName }}-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appLabel }}
+    stage: {{ .Values.stage }}
+spec:
+  selector:
+    app: {{ .Values.appLabel }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{ .Values.containerPort }}
+  type: ClusterIP

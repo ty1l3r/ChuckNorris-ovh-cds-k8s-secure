@@ -1,0 +1,52 @@
+# templates/deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Nom du déploiement, surchargé par environment (ex : chuck-dev, chuck-prod)
+  name: {{ .Values.fullnameOverride }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    # Label d'identification de l'application (utilisé par les Services et autres ressources)
+    app: {{ .Values.appLabel }}
+    # Label optionnel pour suivre l’environnement (dev, prod…)
+    stage: {{ .Values.stage }}
+spec:
+  # Nombre de pods à lancer
+  replicas: {{ .Values.replicaCount }}
+
+  # Permet à Kubernetes de savoir quels pods sont gérés par ce déploiement
+  selector:
+    matchLabels:
+      app: {{ .Values.appLabel }}
+
+  template:
+    metadata:
+      labels:
+        # Les pods héritent de ces labels → ils doivent matcher `selector.matchLabels`
+        app: {{ .Values.appLabel }}
+        stage: {{ .Values.stage }}
+    spec:
+      # Contexte de sécurité global pour le pod
+      securityContext:
+        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
+        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+
+      containers:
+        - name: {{ .Values.containerName }}
+          # Image Docker utilisée (avec tag)
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+
+          # Port exposé par le conteneur (ex: Flask en 5000)
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+
+          # Contexte de sécurité propre au conteneur
+          securityContext:
+            readOnlyRootFilesystem: {{ .Values.containerSecurityContext.readOnlyRootFilesystem }}
+            allowPrivilegeEscalation: {{ .Values.containerSecurityContext.allowPrivilegeEscalation }}
+            capabilities:
+              drop:
+                - {{ .Values.containerSecurityContext.dropCapabilities }}

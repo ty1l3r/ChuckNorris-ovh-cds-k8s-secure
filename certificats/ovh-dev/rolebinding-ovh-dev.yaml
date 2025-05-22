@@ -1,0 +1,18 @@
+# 📁 ~/cds-ovh/certificats/ovh-dev/rolebinding-ovh-dev.yaml
+# ──────────────────────────────────────────────────────────────
+# 🔗 Lie l’utilisateur `ovh-dev` à son rôle RBAC dans `dev`
+# ──────────────────────────────────────────────────────────────
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ovh-dev-binding
+  namespace: dev
+subjects:
+  - kind: User
+    name: ovh-dev
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: ovh-dev-role
+  apiGroup: rbac.authorization.k8s.io
