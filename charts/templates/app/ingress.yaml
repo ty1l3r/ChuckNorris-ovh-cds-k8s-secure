@@ -1,20 +1,19 @@
 # ===================================================================
-# Configuration d'Exposition Web - Ingress
+# Template d'Exposition Réseau de l'Application ChuckNorris
 # ===================================================================
-# Description:   Point d'entrée HTTP pour l'application ChuckNorris
+# Description:   Configuration de l'accès HTTP externe via Ingress
 # Version:       1.0.0
-# Responsable:   Équipe DevOps <devops@example.com>
-# Mise à jour:   15-10-2023
-#
-# Ce template définit les règles d'accès HTTP pour exposer l'application
-# à l'extérieur du cluster via le contrôleur Ingress NGINX.
-# L'exposition est conditionnelle et paramétrable par environnement.
+# Mainteneur:    Équipe DevOps
+# Dernière modif: 23/05/2025
 # ===================================================================
 
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  # ────────────────────────────────────────
+  # Identification : Ressource Ingress
+  # ────────────────────────────────────────
   # Nom de la ressource Ingress généré à partir du nom du conteneur
   name: {{ .Values.containerName }}-ingress
   # Déploiement dans le namespace approprié (dev/prod)
@@ -23,10 +22,16 @@ metadata:
   labels:
     app: {{ .Values.appLabel }}
     stage: {{ .Values.stage }}
+  # ────────────────────────────────────────
+  # Configuration : Contrôleur Ingress
+  # ────────────────────────────────────────
   # Annotations spécifiques pour configurer le comportement du contrôleur Ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  # ────────────────────────────────────────
+  # Routage : Règles d'accès HTTP
+  # ────────────────────────────────────────
   # Règles de routage basées sur le nom d'hôte
   rules:
     - host: {{ .Values.ingress.host }}

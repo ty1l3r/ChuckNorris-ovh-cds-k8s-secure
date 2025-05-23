@@ -55,6 +55,25 @@ Mettre en place un workflow de déploiement sécurisé avec :
 * SecurityContext appliqué sur tous les workloads
 * Images Docker taguées (1.0.0) – pas de latest en prod
 
+### 🛰️ Intégration de Falco (Runtime Security)
+
+Falco a été installé via Helm dans un namespace dédié (`falco`), avec :
+- un déploiement en `DaemonSet`,
+- un PodSecurity Standard restrictif (`restricted:latest`),
+- la collecte de logs centralisée,
+- la validation de son bon fonctionnement via `kubectl get pods` et `kubectl logs`.
+
+Falco permet ici de démontrer une capacité à intégrer un agent de sécurité en temps réel dans un cluster Kubernetes, sans configuration poussée, mais avec une logique de production.
+
+### Signature d’image Docker avec Cosign (Keyless)
+
+Cosign a été intégré dans le pipeline CI/CD pour :
+	•	signer automatiquement l’image Docker via --keyless,
+	•	garantir l’intégrité et la traçabilité sans gestion de clé privée,
+	•	vérifier publiquement la signature via cosign verify.
+
+Cette signature cryptographique assure que l’image provient bien du pipeline validé, conforme aux bonnes pratiques DevSecOps GitOps.
+
 ## Déploiement (dev)
 
 ```bash

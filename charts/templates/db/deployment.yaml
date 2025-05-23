@@ -1,20 +1,23 @@
 # ===================================================================
-# Template de Déploiement de Base de Données
+# Database Deployment Template
 # ===================================================================
-# Description:   Configuration de déploiement PostgreSQL
+# Description:   PostgreSQL database deployment configuration
 # Version:       1.0.0
-# Responsable:   Équipe DevOps <devops@example.com>
-# Mise à jour:   15-10-2023
+# Maintainer:    DevOps Team <devops@example.com>
+# Last Updated:  2023-10-15
 #
-# Ce template définit le déploiement PostgreSQL avec les paramètres
-# de sécurité appropriés, limites de ressources et vérifications de santé.
-# La base de données utilise un ServiceAccount dédié avec privilèges minimaux
-# et suit les bonnes pratiques de sécurité pour les bases de données conteneurisées.
+# This template defines the PostgreSQL database deployment with 
+# appropriate security settings, resource limits and health checks.
+# The database uses a dedicated ServiceAccount with least privilege
+# and follows security best practices for containerized databases.
 # ===================================================================
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  # ────────────────────────────────────────
+  # Identification : Déploiement Database
+  # ────────────────────────────────────────
   name: {{ .Values.db.fullnameOverride }}
   namespace: {{ .Values.namespace }}
   labels:
@@ -22,6 +25,9 @@ metadata:
     app: {{ .Values.db.appLabel }}
     stage: {{ .Values.stage }}
 spec:
+  # ────────────────────────────────────────
+  # Réplication : Configuration des instances
+  # ────────────────────────────────────────
   # Nombre d'instances à exécuter - généralement une seule pour PostgreSQL (stateful)
   replicas: {{ .Values.db.replicaCount }}
   
@@ -37,9 +43,15 @@ spec:
         app: {{ .Values.db.appLabel }}
         stage: {{ .Values.stage }}
     spec:
+      # ────────────────────────────────────────
+      # Authentification : ServiceAccount
+      # ────────────────────────────────────────
       # ServiceAccount dédié avec permissions minimales pour la DB
       serviceAccountName: {{ .Values.db.serviceAccountName }}
 
+      # ────────────────────────────────────────
+      # Sécurité : Contexte d'exécution
+      # ────────────────────────────────────────
       # Configuration de sécurité au niveau du pod
       # 999 est l'utilisateur standard pour PostgreSQL
       securityContext:

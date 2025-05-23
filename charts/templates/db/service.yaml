@@ -15,6 +15,9 @@
 apiVersion: v1
 kind: Service
 metadata:
+  # ────────────────────────────────────────
+  # Identification : Service Base de Données
+  # ────────────────────────────────────────
   # Nom du service (utilisé pour les connexions)
   name: {{ .Values.db.serviceName }}
   # Déployé dans le même namespace que l'application
@@ -24,9 +27,15 @@ metadata:
     app: {{ .Values.db.appLabel }}
     stage: {{ .Values.stage }}
 spec:
+  # ────────────────────────────────────────
+  # Sélection : Pods de base de données
+  # ────────────────────────────────────────
   # Sélectionne les pods de base de données par leur label
   selector:
     app: {{ .Values.db.appLabel }}
+  # ────────────────────────────────────────
+  # Exposition : Configuration réseau
+  # ────────────────────────────────────────
   # Configuration des ports exposés
   ports:
     - protocol: TCP

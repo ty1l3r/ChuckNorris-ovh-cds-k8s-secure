@@ -1,7 +1,7 @@
-# ─────────────────────────────────────────────
-# 🔐 Rôle RBAC pour l’application Chuck Norris
+# ────────────────────────────────────────
+# Rôle RBAC pour l'application Chuck Norris
+# ────────────────────────────────────────
 # Objectif : accès lecture minimale aux ressources nécessaires
-# ─────────────────────────────────────────────
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

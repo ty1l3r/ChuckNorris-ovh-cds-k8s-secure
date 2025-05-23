@@ -1,11 +1,16 @@
-# ──────────────────────────────────────────────────────────────
-#  Configuration Helm : Application Flask Chuck Norris Facts
-# ──────────────────────────────────────────────────────────────
+# ===================================================================
+# Valeurs pour l'Environnement de Développement ChuckNorris
+# ===================================================================
+# Description:   Configuration des paramètres de déploiement en dev
+# Version:       1.0.0
+# Mainteneur:    Équipe DevOps
+# Dernière modif: 23/05/2025
+# ===================================================================
 
 # Namespace de déploiement (ex: dev, prod)
 namespace: dev
 
-# Étiquette d’environnement (affichée comme label)
+# Étiquette d'environnement (affichée comme label)
 stage: dev
 
 # Nombre de réplicas

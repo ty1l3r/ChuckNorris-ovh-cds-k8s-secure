@@ -1,21 +1,18 @@
 # ===================================================================
-# Service pour l'Application ChuckNorris
+# Template de Service pour l'Application ChuckNorris
 # ===================================================================
-# Description:   Exposition interne de l'application web
+# Description:   Configuration du point d'accès réseau interne
 # Version:       1.0.0
-# Responsable:   Équipe DevOps <devops@example.com>
-# Mise à jour:   15-10-2023
-#
-# Ce template définit le service Kubernetes qui expose l'application
-# ChuckNorris à l'intérieur du cluster. Il sert d'abstraction stable
-# au-dessus des pods, permettant la découverte de service et l'équilibrage
-# de charge interne. Il est référencé par la ressource Ingress pour
-# l'exposition externe.
+# Mainteneur:    Équipe DevOps
+# Dernière modif: 23/05/2025
 # ===================================================================
 
 apiVersion: v1
 kind: Service
 metadata:
+  # ────────────────────────────────────────
+  # Identification : Métadonnées Service
+  # ────────────────────────────────────────
   # Nom du service généré à partir du nom du conteneur
   name: {{ .Values.containerName }}-svc
   # Déployé dans le même namespace que l'application
@@ -25,9 +22,15 @@ metadata:
     app: {{ .Values.appLabel }}
     stage: {{ .Values.stage }}
 spec:
+  # ────────────────────────────────────────
+  # Sélection : Pods cibles
+  # ────────────────────────────────────────
   # Sélectionne les pods par leur label app
   selector:
     app: {{ .Values.appLabel }}
+  # ────────────────────────────────────────
+  # Exposition : Configuration des ports
+  # ────────────────────────────────────────
   # Configuration des ports exposés
   ports:
     - protocol: TCP

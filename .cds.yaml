@@ -6,13 +6,12 @@ version: v1.0
 
 name: chucknorris-secure-pipeline
 
-# ─────────────────────────────────────────────
-# 🔧 PIPELINES : Build, Scan, Deploy (Dev → Prod)
-# ─────────────────────────────────────────────
-
 pipelines:
   - name: dev-pipeline
     stages:
+      # ────────────────────────────────────────
+      # Analyse : Scan de code statique
+      # ────────────────────────────────────────
       - name: CodeScan
         jobs:
           - job: static-code-analysis
@@ -21,12 +20,15 @@ pipelines:
             steps:
               - checkout: git
               - script:
-                  - echo "🔍 Scanning Python code with Bandit"
+                  - echo "Scanning Python code with Bandit"
                   - bandit -r ./build -f json -o code-scan-results.json
               - publish:
                   path: code-scan-results.json
                   tag: security-reports
 
+      # ────────────────────────────────────────
+      # Analyse : Scan de dépendances
+      # ────────────────────────────────────────
       - name: DependencyScan
         jobs:
           - job: dependency-check
@@ -34,21 +36,27 @@ pipelines:
               - binary: pip-audit
             steps:
               - script:
-                  - echo "📦 Scanning dependencies for vulnerabilities"
+                  - echo "Scanning dependencies for vulnerabilities"
                   - pip-audit -r ./build/requirements.txt -f json -o deps-scan-results.json
               - publish:
                   path: deps-scan-results.json
                   tag: security-reports
 
+      # ────────────────────────────────────────
+      # Build : Construction de l'image Docker
+      # ────────────────────────────────────────
       - name: BuildImage
         jobs:
           - job: docker-build
             steps:
               - checkout: git
               - script:
-                  - echo "🔧 Building Docker image with no-cache option"
+                  - echo "Building Docker image with no-cache option"
                   - docker build --no-cache -t t1l3r/chucknorris:1.0.0 ./build
 
+      # ────────────────────────────────────────
+      # Sécurité : Analyse de l'image Docker
+      # ────────────────────────────────────────
       - name: ScanImage
         jobs:
           - job: security-scan
@@ -56,13 +64,16 @@ pipelines:
               - binary: trivy
             steps:
               - script:
-                  - echo "🔎 Running enhanced security scan with Trivy"
+                  - echo "Running enhanced security scan with Trivy"
                   - trivy image --exit-code 1 --severity HIGH,CRITICAL t1l3r/chucknorris:1.0.0
                   - trivy config --exit-code 1 --severity HIGH,CRITICAL ./build/
               - publish:
                   path: trivy-results.json
                   tag: security-reports
 
+      # ────────────────────────────────────────
+      # Sécurité : Signature de l'image
+      # ────────────────────────────────────────
       - name: SignImage
         jobs:
           - job: secure-signature
@@ -70,20 +81,25 @@ pipelines:
               - binary: cosign
             steps:
               - script:
-                  - echo "🔏 Signing Docker image with cosign"
-                  - cosign sign --key $COSIGN_KEY t1l3r/chucknorris:1.0.0
+                  - echo "Signing Docker image (keyless mode)"
+                  - cosign sign --keyless t1l3r/chucknorris:1.0.0
 
+      # ────────────────────────────────────────
+      # Distribution : Publication de l'image
+      # ────────────────────────────────────────
       - name: PushImage
         jobs:
           - job: docker-push
             steps:
               - script:
-                  - echo "🚀 Pushing image to Docker Hub with token rotation"
-                  - DOCKER_TOKEN=$(vault read -field=token secret/docker/creds)
-                  - echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                  - echo "Pushing image to Docker Hub"
+                  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                   - docker push t1l3r/chucknorris:1.0.0
                   - docker logout
 
+      # ────────────────────────────────────────
+      # Validation : Charts Helm
+      # ────────────────────────────────────────
       - name: ValidateHelmCharts
         jobs:
           - job: helm-validation
@@ -92,7 +108,7 @@ pipelines:
               - binary: kube-score
             steps:
               - script:
-                  - echo "📊 Validating Helm charts"
+                  - echo "Validating Helm charts"
                   - helm lint charts/
                   - helm template chuck charts/ -f charts/dev-values.yaml > manifests.yaml
                   - kube-score score manifests.yaml --output-format json > helm-validation.json
@@ -100,6 +116,9 @@ pipelines:
                   path: helm-validation.json
                   tag: security-reports
 
+      # ────────────────────────────────────────
+      # Déploiement : Environnement de développement
+      # ────────────────────────────────────────
       - name: DeployToDev
         jobs:
           - job: helm-dev-deploy
@@ -108,13 +127,16 @@ pipelines:
               - binary: kubectl
             steps:
               - script:
-                  - echo "📦 Securing kubeconfig before deployment"
+                  - echo "Deploying to dev"
                   - export KUBECONFIG=/tmp/secure-kubeconfig
                   - vault read -field=config secret/kubernetes/dev-credentials > $KUBECONFIG
                   - chmod 600 $KUBECONFIG
                   - helm upgrade --install chuck charts/ -f charts/dev-values.yaml --namespace dev
                   - rm -f $KUBECONFIG
 
+      # ────────────────────────────────────────
+      # Sécurité : Scan dynamique
+      # ────────────────────────────────────────
       - name: SecurityScan
         jobs:
           - job: dynamic-security-scan
@@ -122,13 +144,16 @@ pipelines:
               - binary: zap-cli
             steps:
               - script:
-                  - echo "🕷️ Running dynamic security scan on deployed app"
-                  - sleep 30 # Wait for deployment to be ready
+                  - echo "Running dynamic security scan"
+                  - sleep 30
                   - zap-cli quick-scan --self-contained --start-options "-config api.disablekey=true" https://chuck.dev.local
               - publish:
                   path: zap-report.html
                   tag: security-reports
 
+  # ────────────────────────────────────────
+  # Approbation : Validation manuelle
+  # ────────────────────────────────────────
   - name: manual-approval
     stages:
       - name: HumanGate
@@ -136,8 +161,11 @@ pipelines:
           - job: wait-for-prod
             steps:
               - script:
-                  - echo "⏸️ Manual approval required before production deployment"
+                  - echo "Manual approval required before production deployment"
 
+  # ────────────────────────────────────────
+  # Déploiement : Environnement de production
+  # ────────────────────────────────────────
   - name: prod-pipeline
     stages:
       - name: DeployToProd
@@ -148,12 +176,8 @@ pipelines:
               - binary: kubectl
             steps:
               - script:
-                  - echo "🚀 Deploying to namespace 'prod'"
+                  - echo "Deploying to namespace 'prod'"
                   - helm upgrade --install chuck charts/ -f charts/prod-values.yaml --namespace prod
-
-# ─────────────────────────────────────────────
-# 🔁 WORKFLOW : Enchaînement GitOps complet
-# ─────────────────────────────────────────────
 
 workflows:
   - name: chucknorris-gitops
@@ -164,10 +188,6 @@ workflows:
     then:
       - manual-approval
       - prod-pipeline
-
-# ─────────────────────────────────────────────
-# 🔐 SECRETS : Docker credentials pour push
-# ─────────────────────────────────────────────
 
 secrets:
   - name: DOCKER_USERNAME
