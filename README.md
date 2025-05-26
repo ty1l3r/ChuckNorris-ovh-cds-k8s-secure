@@ -5,6 +5,26 @@
 ![Helm](https://img.shields.io/badge/Package-Helm-0F1689)
 ![K8s Security](https://img.shields.io/badge/Security-K8s%20Best%20Practices-red)
 
+
+> **Note de présentation**
+>
+> Ce projet est une démonstration technique construite pour illustrer un déploiement sécurisée de type GitOps avec CI/CD, dans un contexte compatible avec l’écosystème OVH (Kubernetes, Helm, CDS, sécurité DevSecOps).
+>
+> L'application choisie ici — un générateur de "Chuck Norris Facts" — sert de prétexte simple et ludique à la démonstration. Le but n’est pas la complexité applicative, mais bien la mise en œuvre des bonnes pratiques de déploiement sécurisé. Ce type de microservice pourrait, à titre d’exemple, être intégré dans une stack comme Decibel ou tout autre socle de monitoring/visualisation interne.
+>
+> L'ensemble des composants techniques suivants sont déjà opérationnels :
+> - Déploiement Helm factorisé sur K3s (environnements dev et prod)
+> - Sécurité : RBAC strict, PodSecurity, SecurityContext, scans automatisés (Trivy), signature d’images Docker (Cosign)
+> - Intégration de Falco pour la sécurité runtime
+> - Pipeline CI/CD (CDS-ready) avec contrôle qualité, sécurité et promotion manuelle vers prod
+>
+> Les éléments suivants sont en cours d’intégration :
+> - Ajout d’un RACI simplifié pour expliciter les responsabilités (Dev / Sec / Ops)
+> - Simulation multi-région via structure Helm étendue (`values-region.yaml`)
+> - Documentation technique détaillée (installation, logique GitOps, bonnes pratiques sécurité)
+>
+> Aucun secret, certificat ou fichier sensible n’est versionné. Le projet suit les standards de sécurité DevSecOps et peut être adapté à des environnements industriels réels.
+
 > Chuck Norris n'a pas besoin de secrets. Les credentials s'auto-signent pour lui.
 
 ![Chuck Norris - ASCII Portrait](assets/chuck2.png)
